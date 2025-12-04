@@ -1,0 +1,582 @@
+<html lang='zh-CN'>
+        <head >
+        <meta charset='UTF-8'/>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+<title >登录与聊天界面</title>
+<!-- 引入 Tailwind CSS -->
+<script src='https://res.gemcoder.com/js/reload.js'></script>
+<script src='https://cdn.tailwindcss.com'></script>
+<!-- 引入 Font Awesome -->
+<link rel='stylesheet' href='https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css'/>
+<style >
+        /* 确保整个页面和聊天区域使用深色背景 */
+        body {
+            background-color: #0f172a; /* slate-900 equivalent for deep blue/dark theme */
+        }
+        /* 滚动条样式美化 (可选，但能提升深色主题质感) */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b; /* slate-800 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569; /* slate-600 */
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b; /* slate-500 */
+        }
+    </style>
+    </head>
+<body class='h-screen overflow-hidden flex'>
+        <!-- 登录界面容器 -->
+<div id='login-container' class='flex items-center justify-center w-full h-full transition-opacity duration-500'>
+        <!-- [MODULE] lgn_登录表单区域 -->
+<div class='w-full max-w-md p-8 space-y-8 bg-slate-800 rounded-xl shadow-2xl border border-slate-700'>
+        <!-- [MODULE] lgn_标题与Logo -->
+<div class='text-center'>
+        <i class='fas fa-robot text-4xl text-indigo-400 mb-2'>
+        </i>
+<h2 class='mt-2 text-3xl font-extrabold text-white'>
+        AI 协作平台
+    </h2>
+<p class='mt-2 text-sm text-slate-400'>
+        使用您的账户登录
+    </p>
+    </div>
+<!-- [/MODULE] lgn_标题与Logo -->
+<!-- [MODULE] lgn_表单输入 -->
+<form id='login-form' class='mt-8 space-y-6'>
+        <div >
+        <label for='username' class='block text-sm font-medium text-slate-300 mb-1'>
+        账号
+    </label>
+<div class='relative'>
+        <div class='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none'>
+        <i class='fas fa-user text-slate-500'>
+        </i>
+    </div>
+<input id='username' name='username' type='text' required class='appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-slate-500 text-white rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-slate-700 sm:text-sm transition duration-150' placeholder='输入您的用户名'/>
+    </div>
+    </div>
+<div >
+        <label for='password' class='block text-sm font-medium text-slate-300 mb-1'>
+        密码
+    </label>
+<div class='relative'>
+        <div class='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none'>
+        <i class='fas fa-lock text-slate-500'>
+        </i>
+    </div>
+<input id='password' name='password' type='password' required class='appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-slate-500 text-white rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-slate-700 sm:text-sm transition duration-150' placeholder='输入您的密码'/>
+    </div>
+    </div>
+<div class='flex items-center justify-between'>
+        <div class='flex items-center'>
+        <input id='remember-me' name='remember-me' type='checkbox' class='h-4 w-4 text-indigo-600 border-slate-600 rounded focus:ring-indigo-500 bg-slate-700'/>
+<label for='remember-me' class='ml-2 block text-sm text-slate-400'>
+        记住我
+    </label>
+    </div>
+<div class='text-sm'>
+        <a href='javascript:void(0);' class='font-medium text-indigo-400 hover:text-indigo-300'>
+        忘记密码?
+    </a>
+    </div>
+    </div>
+<div >
+        <button type='submit' class='group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-800 transition duration-150 ease-in-out'>
+        <span class='absolute left-0 inset-y-0 flex items-center pl-3'>
+        <i class='fas fa-sign-in-alt text-indigo-300 group-hover:text-white'>
+        </i>
+    </span>
+登录
+    </button>
+    </div>
+    </form>
+<!-- [/MODULE] lgn_表单输入 -->
+    </div>
+<!-- [/MODULE] lgn_登录表单区域 -->
+    </div>
+<!-- 聊天界面容器 (初始隐藏) -->
+<div id='chat-container' class='flex w-full h-full hidden opacity-0 transition-opacity duration-500'>
+        <!-- [MODULE] cht_左侧导航栏 -->
+<aside class='w-64 bg-slate-900 border-r border-slate-700 flex flex-col'>
+        <!-- [MODULE] cht_左侧导航栏: 房间列表 -->
+<div class='p-4 border-b border-slate-700 flex-shrink-0'>
+        <h3 class='text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2'>
+        Channels
+    </h3>
+<div id='room-list' class='space-y-1'>
+        <!-- 房间项 -->
+<a href='javascript:void(0);' data-room-id='general' class='room-item flex items-center p-2 text-sm font-medium rounded-lg text-white bg-slate-700 hover:bg-slate-600 transition duration-150 cursor-pointer'>
+        <i class='fas fa-hashtag mr-2 text-slate-400'>
+        </i>
+<span >
+        # General Chat
+    </span>
+    </a>
+<a href='javascript:void(0);' data-room-id='ai-dev' class='room-item flex items-center p-2 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-700 transition duration-150 cursor-pointer'>
+        <i class='fas fa-hashtag mr-2 text-slate-500'>
+        </i>
+<span >
+        # AI Development
+    </span>
+    </a>
+<a href='javascript:void(0);' data-room-id='design' class='room-item flex items-center p-2 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-700 transition duration-150 cursor-pointer'>
+        <i class='fas fa-hashtag mr-2 text-slate-500'>
+        </i>
+<span >
+        # Design Feedback
+    </span>
+    </a>
+    </div>
+    </div>
+<!-- [/MODULE] cht_左侧导航栏: 房间列表 -->
+<!-- [MODULE] cht_左侧导航栏: 用户列表 -->
+<div class='p-4 flex-grow overflow-y-auto custom-scrollbar'>
+        <h3 class='text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2'>
+        Online Users (5)
+    </h3>
+<div id='user-list' class='space-y-2'>
+        <!-- 用户项 -->
+<div class='flex items-center p-1 rounded-lg hover:bg-slate-700 transition duration-150 cursor-pointer'>
+        <div class='relative'>
+        <!-- 占位图：用户头像 -->
+<img class='w-8 h-8 rounded-full object-cover mr-3' src='https://design.gemcoder.com/staticResource/echoAiSystemImages/3cc2f985d92c179b633ce83e531c7156.png' alt='User Avatar'/>
+<span class='absolute bottom-0 right-3 block h-2.5 w-2.5 rounded-full ring-2 ring-slate-900 bg-green-400'>
+        </span>
+    </div>
+<span class='text-sm font-medium text-white truncate'>
+        Alice_Dev
+    </span>
+    </div>
+<div class='flex items-center p-1 rounded-lg hover:bg-slate-700 transition duration-150 cursor-pointer'>
+        <div class='relative'>
+        <!-- 占位图：用户头像 -->
+<img class='w-8 h-8 rounded-full object-cover mr-3' src='https://design.gemcoder.com/staticResource/echoAiSystemImages/3cc2f985d92c179b633ce83e531c7156.png' alt='User Avatar'/>
+<span class='absolute bottom-0 right-3 block h-2.5 w-2.5 rounded-full ring-2 ring-slate-900 bg-green-400'>
+        </span>
+    </div>
+<span class='text-sm font-medium text-white truncate'>
+        Bob_Designer
+    </span>
+    </div>
+<div class='flex items-center p-1 rounded-lg hover:bg-slate-700 transition duration-150 cursor-pointer'>
+        <div class='relative'>
+        <!-- 占位图：用户头像 -->
+<img class='w-8 h-8 rounded-full object-cover mr-3' src='https://design.gemcoder.com/staticResource/echoAiSystemImages/3cc2f985d92c179b633ce83e531c7156.png' alt='User Avatar'/>
+<span class='absolute bottom-0 right-3 block h-2.5 w-2.5 rounded-full ring-2 ring-slate-900 bg-yellow-400'>
+        </span>
+    </div>
+<span class='text-sm font-medium text-white truncate'>
+        Charlie_PM
+    </span>
+    </div>
+<div class='flex items-center p-1 rounded-lg hover:bg-slate-700 transition duration-150 cursor-pointer'>
+        <div class='relative'>
+        <!-- 占位图：用户头像 -->
+<img class='w-8 h-8 rounded-full object-cover mr-3' src='https://design.gemcoder.com/staticResource/echoAiSystemImages/3cc2f985d92c179b633ce83e531c7156.png' alt='User Avatar'/>
+<span class='absolute bottom-0 right-3 block h-2.5 w-2.5 rounded-full ring-2 ring-slate-900 bg-green-400'>
+        </span>
+    </div>
+<span class='text-sm font-medium text-white truncate'>
+        Diana_Lead
+    </span>
+    </div>
+<div class='flex items-center p-1 rounded-lg hover:bg-slate-700 transition duration-150 cursor-pointer'>
+        <div class='relative'>
+        <!-- 占位图：用户头像 -->
+<img class='w-8 h-8 rounded-full object-cover mr-3' src='https://design.gemcoder.com/staticResource/echoAiSystemImages/3cc2f985d92c179b633ce83e531c7156.png' alt='User Avatar'/>
+<span class='absolute bottom-0 right-3 block h-2.5 w-2.5 rounded-full ring-2 ring-slate-900 bg-green-400'>
+        </span>
+    </div>
+<span class='text-sm font-medium text-white truncate'>
+        Ethan_AI
+    </span>
+    </div>
+    </div>
+    </div>
+<!-- [/MODULE] cht_左侧导航栏: 用户列表 -->
+    </aside>
+<!-- [/MODULE] cht_左侧导航栏 -->
+<!-- [MODULE] cht_右侧主界面 -->
+<main class='flex-1 flex flex-col bg-slate-800'>
+        <!-- [MODULE] cht_右侧主界面: 顶部状态栏 -->
+<header class='flex items-center justify-between p-4 border-b border-slate-700 bg-slate-800 flex-shrink-0'>
+        <div class='flex items-center'>
+        <h1 id='current-room-name' class='text-xl font-bold text-white mr-2'>
+        # AI Development
+    </h1>
+<span id='member-count' class='text-sm text-slate-400 bg-slate-700 px-2 py-0.5 rounded-full'>
+        5 Members
+    </span>
+    </div>
+<div class='flex space-x-4'>
+        <button class='text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-700 transition duration-150' title='Search'>
+        <i class='fas fa-search'>
+        </i>
+    </button>
+<button class='text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-700 transition duration-150' title='Room Info'>
+        <i class='fas fa-info-circle'>
+        </i>
+    </button>
+<button id='logout-button' class='text-red-400 hover:text-red-300 p-2 rounded-full hover:bg-slate-700 transition duration-150' title='Logout'>
+        <i class='fas fa-sign-out-alt'>
+        </i>
+    </button>
+    </div>
+    </header>
+<!-- [/MODULE] cht_右侧主界面: 顶部状态栏 -->
+<!-- [MODULE] cht_右侧主界面: 消息记录区 -->
+<div id='message-area' class='flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar'>
+        <!-- 示例消息：系统通知 -->
+<div class='text-center text-xs text-slate-400 pt-4'>
+        <span class='bg-slate-700 px-3 py-1 rounded-full'>
+        Today
+    </span>
+    </div>
+<!-- 示例消息：用户消息 -->
+<div class='flex items-start space-x-3 group'>
+        <!-- 头像 -->
+<img class='w-10 h-10 rounded-lg object-cover flex-shrink-0 mt-1' src='https://design.gemcoder.com/staticResource/echoAiSystemImages/181a32da8724b4ab6871fe5dd21a5304.png' alt='User Avatar'/>
+<div class='flex flex-col min-w-0'>
+        <div class='flex items-center space-x-2 mb-1'>
+        <span class='font-semibold text-indigo-300'>
+        Ethan_AI
+    </span>
+<span class='text-xs text-slate-500'>
+        10:30 AM
+    </span>
+    </div>
+<!-- 消息内容 -->
+<div class='bg-slate-700 p-3 rounded-xl rounded-tl-none max-w-3xl shadow-md'>
+        <p class='text-white whitespace-pre-wrap'>
+        大家好！我正在尝试集成Echarts到这个深色主题的界面中。请问大家对图表组件的布局有什么建议吗？
+    </p>
+    </div>
+    </div>
+    </div>
+<!-- 示例消息：@提及 -->
+<div class='flex items-start space-x-3 group'>
+        <!-- 头像 -->
+<img class='w-10 h-10 rounded-lg object-cover flex-shrink-0 mt-1' src='https://design.gemcoder.com/staticResource/echoAiSystemImages/181a32da8724b4ab6871fe5dd21a5304.png' alt='User Avatar'/>
+<div class='flex flex-col min-w-0'>
+        <div class='flex items-center space-x-2 mb-1'>
+        <span class='font-semibold text-white'>
+        Alice_Dev
+    </span>
+<span class='text-xs text-slate-500'>
+        10:32 AM
+    </span>
+    </div>
+<!-- 消息内容 -->
+<div class='bg-slate-700 p-3 rounded-xl rounded-tl-none max-w-3xl shadow-md'>
+        <p class='text-white whitespace-pre-wrap'>
+        <span class='text-indigo-400 font-bold'>
+        @Ethan_AI
+    </span>
+布局方面，建议使用Flexbox或Grid来确保图表容器的响应式，并确保父容器有明确的高度设置，否则Echarts可能无法渲染。
+    </p>
+    </div>
+    </div>
+    </div>
+<!-- 占位符：用于模拟新消息的滚动 -->
+<div id='message-anchor'>
+        </div>
+    </div>
+<!-- [/MODULE] cht_右侧主界面: 消息记录区 -->
+<!-- [MODULE] cht_右侧主界面: 输入框区域 -->
+<div class='p-4 border-t border-slate-700 flex-shrink-0 bg-slate-800'>
+        <div class='relative'>
+        <textarea id='message-input' rows='3' class='w-full p-3 pr-24 text-white bg-slate-700 border border-slate-600 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400 resize-none custom-scrollbar' placeholder='输入消息，支持@音乐，@电影 或直接与AI对话...'>
+        </textarea>
+<div class='absolute bottom-2 right-2 flex space-x-2'>
+        <button id='attach-button' class='p-2 text-slate-400 hover:text-indigo-400 rounded-full hover:bg-slate-600 transition duration-150' title='Attach File'>
+        <i class='fas fa-paperclip'>
+        </i>
+    </button>
+<button id='send-button' class='p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-500 transition duration-150 disabled:bg-indigo-800 disabled:cursor-not-allowed' title='Send Message'>
+        <i class='fas fa-paper-plane'>
+        </i>
+    </button>
+    </div>
+    </div>
+<div class='text-xs text-slate-500 mt-1 ml-1'>
+        Press Enter to send, Shift+Enter for new line.
+    </div>
+    </div>
+<!-- [/MODULE] cht_右侧主界面: 输入框区域 -->
+    </main>
+<!-- [/MODULE] cht_右侧主界面 -->
+    </div>
+<!-- [JSMOD] login_interaction -->
+<script id='login-js'>document.addEventListener('DOMContentLoaded', function () {
+  var loginContainer = document.getElementById('login-container');
+  var chatContainer = document.getElementById('chat-container');
+  var loginForm = document.getElementById('login-form');
+  var usernameInput = document.getElementById('username');
+  var passwordInput = document.getElementById('password');
+  // 模拟登录成功后的页面切换
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var username = usernameInput.value.trim();
+    var password = passwordInput.value.trim();
+    // 简单的验证逻辑
+    if (username === "" || password === "") {
+      alert("请输入账号和密码！");
+      return;
+    }
+    // 模拟API调用延迟
+    console.log("Attempting login for:".concat(username));
+
+    // 隐藏登录界面
+    loginContainer.style.opacity = '0';
+    setTimeout(function () {
+      loginContainer.classList.add('hidden');
+
+      // 显示聊天界面
+      chatContainer.classList.remove('hidden');
+      // 触发淡入效果
+      setTimeout(function () {
+        chatContainer.style.opacity = '1';
+      }, 50);
+
+      // 模拟用户登录后的欢迎消息
+      displaySystemMessage("\u6B22\u8FCE\u56DE\u6765,".concat(username, "! \u60A8\u5DF2\u8FDB\u5165").concat(document.getElementById('current-room-name').textContent.trim(), "\u9891\u9053\u3002"));
+    }, 500); // 匹配CSS过渡时间
+  });
+});</script>
+<!-- [/JSMOD] login_interaction -->
+<!-- [JSMOD] chat_interaction -->
+<script id='chat-js'>document.addEventListener('DOMContentLoaded', function () {
+  var roomList = document.getElementById('room-list');
+  var messageInput = document.getElementById('message-input');
+  var sendButton = document.getElementById('send-button');
+  var messageArea = document.getElementById('message-area');
+  var currentRoomNameEl = document.getElementById('current-room-name');
+  var memberCountEl = document.getElementById('member-count');
+  var logoutButton = document.getElementById('logout-button');
+  var loginContainer = document.getElementById('login-container');
+  var chatContainer = document.getElementById('chat-container');
+  var currentRoomId = 'ai-dev'; // 默认房间
+  // 模拟数据
+  var roomData = {
+    'general': {
+      name: '# General Chat',
+      members: 12
+    },
+    'ai-dev': {
+      name: '# AI Development',
+      members: 5
+    },
+    'design': {
+      name: '# Design Feedback',
+      members: 8
+    }
+  };
+  // --- 辅助函数 ---
+  /**
+   * 滚动到底部
+   */
+  function scrollToBottom() {
+    messageArea.scrollTop = messageArea.scrollHeight;
+  }
+  /**
+   * 创建用户消息 DOM 元素
+   * @param {string} username 
+   * @param {string} content 
+   * @param {string} time 
+   * @param {string} avatarUrl 
+   */
+  function createUserMessageDOM(username, content, time, avatarUrl) {
+    var messageDiv = document.createElement('div');
+    messageDiv.className = 'flex items-start space-x-3 group';
+    var isCurrentUser = username === "Current_User"; // 假设当前用户发送的消息需要特殊处理（例如靠右对齐，这里简化为靠左）
+    var avatarImg = document.createElement('img');
+    avatarImg.className = "w-10 h-10 rounded-lg object-cover flex-shrink-0 mt-1";
+    avatarImg.src = avatarUrl || "https://design.gemcoder.com/staticResource/echoAiSystemImages/181a32da8724b4ab6871fe5dd21a5304.png";
+    avatarImg.alt = "User Avatar";
+    var contentDiv = document.createElement('div');
+    contentDiv.className = 'flex flex-col min-w-0';
+    var headerDiv = document.createElement('div');
+    headerDiv.className = 'flex items-center space-x-2 mb-1';
+    var nameSpan = document.createElement('span');
+    nameSpan.className = isCurrentUser ? 'font-semibold text-green-300' : 'font-semibold text-white';
+    nameSpan.textContent = username;
+    var timeSpan = document.createElement('span');
+    timeSpan.className = 'text-xs text-slate-500';
+    timeSpan.textContent = time;
+    var bubbleDiv = document.createElement('div');
+    bubbleDiv.className = "p-3 rounded-xl max-w-3xl shadow-md whitespace-pre-wrap".concat(isCurrentUser ? 'bg-indigo-600 text-white rounded-br-none ml-auto' : 'bg-slate-700 text-white rounded-tl-none');
+    bubbleDiv.innerHTML = formatContent(content);
+    headerDiv.appendChild(nameSpan);
+    headerDiv.appendChild(timeSpan);
+    contentDiv.appendChild(headerDiv);
+    contentDiv.appendChild(bubbleDiv);
+    if (!isCurrentUser) {
+      messageDiv.appendChild(avatarImg);
+      messageDiv.appendChild(contentDiv);
+    } else {
+      // 如果是当前用户，结构需要调整以实现右对齐效果 (这里简化处理，只调整气泡样式)
+      messageDiv.className = 'flex items-start space-x-3 group justify-end';
+      contentDiv.classList.remove('min-w-0');
+      contentDiv.classList.add('items-end');
+
+      // 移除头像，或者将头像放在右侧（这里选择移除头像，保持简洁）
+      // 如果需要头像，需要更复杂的flex布局调整
+      messageDiv.appendChild(contentDiv);
+      messageDiv.appendChild(avatarImg); // 模拟头像在右侧
+    }
+    return messageDiv;
+  }
+  /**
+   * 显示系统消息
+   * @param {string} message 
+   */
+  function displaySystemMessage(message) {
+    var wrapper = document.createElement('div');
+    wrapper.className = "text-center text-xs pt-4";
+    var span = document.createElement('span');
+    span.className = "bg-slate-700 px-3 py-1 rounded-full text-slate-300";
+    span.textContent = message;
+    wrapper.appendChild(span);
+    messageArea.appendChild(wrapper);
+    scrollToBottom();
+  }
+  /**
+   * 格式化消息内容，处理 @ 提及
+   * @param {string} text 
+   */
+  function formatContent(text) {
+    // 匹配 @user, @music, @movie
+    return text.replace(/(@\w+)/g, function (match) {
+      return "<span class=\"text-indigo-400 font-bold\">".concat(match, "</span>");
+    }).replace(/\n/g, '<br>'); // 换行符处理
+  }
+  /**
+   * 切换房间
+   * @param {string} roomId 
+   */
+  function switchRoom(roomId) {
+    if (currentRoomId === roomId) return;
+    currentRoomId = roomId;
+    var roomInfo = roomData[roomId];
+    // 1. 更新顶部状态栏
+    currentRoomNameEl.textContent = roomInfo.name;
+    memberCountEl.textContent = "".concat(roomInfo.members, "Members");
+    // 2. 更新房间列表高亮
+    document.querySelectorAll('.room-item').forEach(function (item) {
+      item.classList.remove('bg-slate-700', 'text-white');
+      item.classList.add('text-slate-300', 'hover:bg-slate-700');
+      if (item.dataset.roomId === roomId) {
+        item.classList.add('bg-slate-700', 'text-white');
+        item.classList.remove('text-slate-300', 'hover:bg-slate-700');
+      }
+    });
+    // 3. 模拟加载新消息
+    loadMessages(roomId);
+  }
+  /**
+   * 模拟加载消息
+   */
+  function loadMessages(roomId) {
+    // 清空当前消息区域 (除了系统消息锚点)
+    var anchor = document.getElementById('message-anchor');
+    while (messageArea.firstChild) {
+      messageArea.removeChild(messageArea.firstChild);
+    }
+    messageArea.appendChild(anchor); // 重新放置锚点
+    // 模拟加载历史消息
+    if (roomId === 'ai-dev') {
+      // 恢复示例消息
+      displaySystemMessage("Today");
+      var msg1 = createUserMessageDOM("Ethan_AI", "大家好！我正在尝试集成Echarts到这个深色主题的界面中。请问大家对图表组件的布局有什么建议吗？", "10:30 AM", null);
+      messageArea.insertBefore(msg1, anchor);
+      var msg2 = createUserMessageDOM("Alice_Dev", "布局方面，建议使用Flexbox或Grid来确保图表容器的响应式，并确保父容器有明确的高度设置，否则Echarts可能无法渲染。", "10:32 AM", null);
+      messageArea.insertBefore(msg2, anchor);
+      displaySystemMessage("Yesterday");
+      var msg3 = createUserMessageDOM("Bob_Designer", "这个深色主题看起来很棒，很有专业感！", "Yesterday 5:00 PM", null);
+      messageArea.insertBefore(msg3, anchor);
+    } else if (roomId === 'general') {
+      displaySystemMessage("Today");
+      var msg = createUserMessageDOM("System", "欢迎来到 # General Chat 频道。", "9:00 AM", null);
+      messageArea.insertBefore(msg, anchor);
+    } else {
+      displaySystemMessage("Today");
+      var _msg = createUserMessageDOM("System", "\u60A8\u5DF2\u8FDB\u5165".concat(roomData[roomId].name, "\u9891\u9053\u3002"), "9:00 AM", null);
+      messageArea.insertBefore(_msg, anchor);
+    }
+    scrollToBottom();
+  }
+  /**
+   * 发送消息
+   */
+  function sendMessage() {
+    var content = messageInput.value.trim();
+    if (content === "") return;
+    var now = new Date();
+    var timeString = "".concat(String(now.getHours()).padStart(2, '0'), ":").concat(String(now.getMinutes()).padStart(2, '0'), "").concat(now.getHours() >= 12 ? 'PM' : 'AM');
+
+    // 模拟当前用户发送消息 (使用一个特殊的标记 "Current_User")
+    var newMessage = createUserMessageDOM("Current_User", content, timeString, null);
+
+    // 插入到锚点前
+    messageArea.insertBefore(newMessage, document.getElementById('message-anchor'));
+    messageInput.value = '';
+    adjustTextareaHeight(); // 调整高度
+    scrollToBottom();
+  }
+  /**
+   * 调整 textarea 高度以适应内容
+   */
+  function adjustTextareaHeight() {
+    messageInput.style.height = 'auto';
+    // 限制最大高度，防止撑开过大
+    var maxHeight = 120; // 约等于 6 行高度
+    messageInput.style.height = Math.min(messageInput.scrollHeight, maxHeight) + 'px';
+  }
+  // --- 事件监听 ---
+  // 房间切换
+  roomList.addEventListener('click', function (e) {
+    var roomItem = e.target.closest('.room-item');
+    if (roomItem) {
+      switchRoom(roomItem.dataset.roomId);
+    }
+  });
+  // 发送按钮点击
+  sendButton.addEventListener('click', sendMessage);
+  // 输入框回车发送 (Shift+Enter 换行)
+  messageInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  // 实时调整 textarea 高度
+  messageInput.addEventListener('input', adjustTextareaHeight);
+  // 登出功能
+  logoutButton.addEventListener('click', function () {
+    if (confirm("确定要退出登录吗？")) {
+      // 隐藏聊天界面
+      chatContainer.style.opacity = '0';
+      setTimeout(function () {
+        chatContainer.classList.add('hidden');
+
+        // 显示登录界面
+        loginContainer.classList.remove('hidden');
+        setTimeout(function () {
+          loginContainer.style.opacity = '1';
+        }, 50);
+      }, 500);
+    }
+  });
+  // 初始设置
+  adjustTextareaHeight();
+  loadMessages(currentRoomId); // 加载默认房间消息
+  scrollToBottom();
+});</script>
+<!-- [/JSMOD] chat_interaction -->
+    </body>
+    </html>

@@ -1,0 +1,13 @@
+{
+  "siliconflow_api_key": "sk-pidjmsngxjcjoeimaxtccqbqepllxrimfdeagkqxitnbsbxm",
+  "servers": [
+    {
+      "name": "本地(8891)",
+      "ws_url": "ws://127.0.0.1:8891/ws"
+    },
+    {
+      "name": "公网(小米球)",
+      "ws_url": "ws://ngrok.xiaomiqiu123.top:63373/ws"
+    }
+  ]
+}

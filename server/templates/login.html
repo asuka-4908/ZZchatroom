@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/favicon/manifest.json">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ZZ聊天室 - 登录</title>
+  <style>
+    html,body{height:100%;margin:0}
+    body{display:flex;align-items:center;justify-content:center;background:#0f172a;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#e5e7eb}
+    .card{width:100%;max-width:420px;background:#1f2937;border:1px solid #374151;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.3);padding:24px}
+    .title{font-size:22px;font-weight:700;margin:4px 0 16px;color:#fff;text-align:center}
+    label{display:block;font-size:13px;color:#cbd5e1;margin-bottom:6px}
+    input,select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #475569;background:#334155;color:#fff;outline:none}
+    input:focus,select:focus{border-color:#60a5fa}
+    .row{margin-bottom:14px}
+    .btn{width:100%;padding:10px 14px;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-weight:600;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .small{color:#94a3b8;font-size:12px;margin-top:6px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">ZZ聊天室 登录</div>
+    <div class="row">
+      <label for="nick">昵称</label>
+      <input id="nick" type="text" placeholder="请输入昵称">
+    </div>
+    <div class="row">
+      <label for="password">密码</label>
+      <input id="password" type="password" placeholder="请输入密码">
+    </div>
+    <div class="row">
+      <label for="server">服务器地址</label>
+      <select id="server"></select>
+    </div>
+    <button id="loginBtn" class="btn">登录</button>
+    <div class="small" style="margin-top:8px">
+      <a id="registerLink" href="javascript:void(0)" style="color:#60a5fa;text-decoration:none">没有账号？注册</a>
+    </div>
+    <div class="small">仅消息区允许滚动，其它区域不滚动</div>
+  </div>
+
+  <script>(function(){var s=document.createElement('script');s.src='/static/vendor/jquery-3.7.1.min.js';s.onerror=function(){var c=document.createElement('script');c.src='https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js';document.head.appendChild(c);};document.head.appendChild(s);}());</script>
+  <script>
+    (function(){
+      var $server = document.getElementById('server');
+      var $login = document.getElementById('loginBtn');
+      var $nick = document.getElementById('nick');
+      var $pwd = document.getElementById('password');
+
+      fetch('/config').then(function(r){return r.json()}).then(function(cfg){
+        var servers = (cfg && cfg.servers) || [];
+        servers.forEach(function(s){
+          var opt = document.createElement('option');
+          opt.value = s.ws_url;
+          opt.textContent = s.name + ' - ' + s.ws_url;
+          $server.appendChild(opt);
+        });
+        if(!$server.value && servers.length){ $server.value = servers[0].ws_url; }
+      }).catch(function(){
+        var opt = document.createElement('option');
+        opt.value = 'ws://127.0.0.1:8888/ws';
+        opt.textContent = '本地服务器 - ws://127.0.0.1:8888/ws';
+        $server.appendChild(opt);
+      });
+
+      function goChat(nick, srv){
+        var qs = new URLSearchParams({ nick: nick, server: srv, room: 'general' }).toString();
+        location.href = '/chat?' + qs;
+      }
+      $login.addEventListener('click', function(){
+        var nick = ($nick.value||'').trim();
+        var pwd = ($pwd.value||'').trim();
+        var srv = $server.value;
+        if(!nick){ alert('请输入昵称'); return; }
+        if(!pwd){ alert('请输入密码'); return; }
+        if(!srv){ alert('请选择服务器'); return; }
+        fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nick:nick, password:pwd}) })
+          .then(function(r){ return r.json(); })
+          .then(function(res){ if(res && res.code === 0){ goChat(nick, srv); } else { alert(res && res.message || '登录失败'); } })
+          .catch(function(){ alert('登录接口异常'); });
+      });
+
+      document.getElementById('registerLink').addEventListener('click', function(){
+        var nick = ($nick.value||'').trim();
+        var pwd = ($pwd.value||'').trim();
+        if(!nick){ alert('请输入昵称'); return; }
+        if(!pwd){ alert('请输入密码'); return; }
+        fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nick:nick, password:pwd}) })
+          .then(function(r){ return r.json(); })
+          .then(function(res){ alert(res && res.message || '请求已提交'); })
+          .catch(function(){ alert('注册接口异常'); });
+      });
+    })();
+  </script>
+</body>
+</html>

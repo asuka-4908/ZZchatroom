@@ -1,0 +1,1265 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/favicon/manifest.json">
+  <title>ZZ聊天室</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      display: flex;
+      background: #0b1220;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji";
+      color: #e5e7eb;
+      overflow: hidden
+    }
+
+    .layout {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #0e1626;
+      border-right: 1px solid #1f2a3a;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .side-top {
+      padding: 16px;
+      border-bottom: 1px solid #1f2a3a
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 20px;
+      color: #ffffff
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: #9aa8b9;
+      margin-top: 4px
+    }
+
+    .section-title {
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #9aa8b9
+    }
+
+    .rooms {
+      padding: 0 10px 12px
+    }
+
+    .room {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #e5e7eb;
+      cursor: pointer
+    }
+
+    .room.active {
+      background: #173055;
+      border: 1px solid #2961b6;
+      color: #ffffff
+    }
+
+    .badge {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      min-width: 18px;
+      height: 18px;
+      line-height: 18px;
+      border-radius: 9px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 11px;
+      text-align: center;
+      padding: 0 6px
+    }
+
+    .users {
+      padding: 0 10px 16px
+    }
+
+    .user-list {
+      max-height: 140px;
+      overflow: hidden
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      color: #e5e7eb
+    }
+
+    .avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #31425a
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      border: 2px solid #0e1626
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #121a2b
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid #1f2a3a;
+      background: #121a2b
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px 20px;
+      scrollbar-width: thin;
+      scrollbar-color: #2a3b58 #121a2b
+    }
+
+    .messages::-webkit-scrollbar {
+      width: 8px
+    }
+
+    .messages::-webkit-scrollbar-track {
+      background: #121a2b
+    }
+
+    .messages::-webkit-scrollbar-thumb {
+      background: #2a3b58;
+      border-radius: 6px;
+      border: 2px solid #121a2b
+    }
+
+    .messages::-webkit-scrollbar-thumb:hover {
+      background: #3b82f6
+    }
+
+    .history-list {
+      scrollbar-width: thin;
+      scrollbar-color: #2a3b58 #0e1626
+    }
+
+    .history-list::-webkit-scrollbar {
+      width: 8px
+    }
+
+    .history-list::-webkit-scrollbar-track {
+      background: #0e1626
+    }
+
+    .history-list::-webkit-scrollbar-thumb {
+      background: #2a3b58;
+      border-radius: 6px;
+      border: 2px solid #0e1626
+    }
+
+    .history-list::-webkit-scrollbar-thumb:hover {
+      background: #3b82f6
+    }
+
+    .history-progress {
+      height: 3px;
+      background: #1f2a3a
+    }
+
+    .history-progress .bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+      transition: width .4s ease;
+    }
+
+    .danger-btn {
+      background: #1a1a1a;
+      border: 1px solid #7f1d1d;
+      color: #f87171
+    }
+
+    .confirm-box {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background: #0e1626;
+      border: 1px solid #1f2a3a;
+      border-radius: 8px
+    }
+
+    .welcome {
+      display: flex;
+      justify-content: center;
+      padding-top: 6px
+    }
+
+    .pill {
+      display: inline-block;
+      background: #16253f;
+      border: 1px solid #2a3b58;
+      color: #cbd5e1;
+      padding: 6px 10px;
+      border-radius: 14px
+    }
+
+    .composer {
+      padding: 12px;
+      border-top: 1px solid #1f2a3a;
+      background: #121a2b
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap
+    }
+
+    .tool-btn {
+      background: #1a2740;
+      border: 1px solid #30425c;
+      color: #cbd5e1;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    .tool-btn:hover {
+      border-color: #3b82f6;
+      color: #ffffff
+    }
+
+    .emoji-picker {
+      display: none;
+      background: #0e1626;
+      border: 1px solid #1f2a3a;
+      border-radius: 10px;
+      padding: 8px;
+      margin-bottom: 8px;
+      z-index: 10
+    }
+
+    .emoji-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .emoji-item {
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px
+    }
+
+    .emoji-item:hover {
+      background: #173055
+    }
+
+    .input {
+      width: 100%;
+      min-height: 48px;
+      max-height: 160px;
+      padding: 10px 44px 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #30425c;
+      background: #1a2740;
+      color: #fff;
+      resize: none;
+      overflow: hidden
+    }
+
+    .tools {
+      position: relative
+    }
+
+    .send {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+      white-space: pre-wrap;
+      word-break: break-word
+    }
+
+    .row {
+      display: flex;
+      margin: 10px 0
+    }
+
+    .row.user {
+      justify-content: flex-end
+    }
+
+    .bubble.user {
+      background: #2563eb;
+      color: #fff;
+      border-top-right-radius: 6px
+    }
+
+    .bubble.other {
+      background: #223354;
+      color: #fff;
+      border-top-left-radius: 6px
+    }
+
+    .music-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 6px;
+      max-width: 380px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .music-cover {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #000;
+      flex-shrink: 0;
+    }
+
+    .music-info {
+      flex: 1;
+      min-width: 140px;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .music-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .music-singer {
+      font-size: 12px;
+      color: #9aa8b9;
+      margin-top: 2px;
+    }
+
+    .music-card audio {
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .weather-card {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border-radius: 12px;
+      padding: 16px;
+      color: #fff;
+      margin-top: 6px;
+      max-width: 320px;
+      font-family: sans-serif;
+    }
+
+    .weather-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .weather-city {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .weather-date {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .weather-main {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .weather-temp {
+      font-size: 32px;
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    .weather-desc {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .weather-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    .weather-detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .weather-label {
+      opacity: 0.8;
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px
+    }
+
+    .name-blue {
+      color: #60a5fa;
+      font-weight: 600
+    }
+
+    .time-gray {
+      color: #9aa8b9
+    }
+
+    .news-card {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px;
+      color: #fff;
+      margin-top: 6px;
+      max-width: 540px;
+    }
+
+    .news-item {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .news-item:last-child {
+      border-bottom: none;
+    }
+
+    .news-thumb {
+      width: 96px;
+      height: 72px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #0b1220;
+    }
+
+    .news-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .news-brief {
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .news-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .news-link {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    .system {
+      display: flex;
+      justify-content: center;
+      font-size: 12px;
+      color: #cbd5e1
+    }
+
+    .tag {
+      font-weight: 700;
+      color: #60a5fa
+    }
+
+    .emoji {
+      font-size: 22px
+    }
+
+    .logout {
+      color: #f87171;
+      background: transparent;
+      border: none;
+      cursor: pointer
+    }
+
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 220px
+      }
+
+      .bubble {
+        max-width: 85%
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 200px
+      }
+
+      .topbar {
+        padding: 10px
+      }
+
+      .composer {
+        padding: 10px
+      }
+    }
+
+    @media (max-width: 640px) {
+      .sidebar {
+        display: none
+      }
+
+      .main {
+        width: 100%
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-top">
+        <div class="brand">AI Chat</div>
+        <div class="brand-sub">Local Dev Mode</div>
+      </div>
+      <div class="section-title">聊天频道</div>
+      <div class="rooms">
+        <div class="room active" data-room="general"># General Chat</div>
+        <div class="room" data-room="ai-dev"># AI Development</div>
+        <div class="room" data-room="music"># Music & Fun</div>
+      </div>
+      <div class="section-title">在线用户 (<span id="userCount">0</span>)</div>
+      <div class="users">
+        <div id="userList" class="user-list"></div>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <span id="roomName"># General Chat</span>
+          <span id="memberCount" style="margin-left:8px;font-size:12px;color:#94a3b8">多人群聊</span>
+        </div>
+        <button id="logout" class="logout">退出</button>
+      </div>
+      <div id="messages" class="messages"></div>
+      <div class="composer">
+        <div class="toolbar">
+          <button type="button" id="emojiBtn" class="tool-btn">😀 表情</button>
+          <button type="button" class="tool-btn cmd" data-cmd="🤖成小理">🤖成小理</button>
+          <button type="button" class="tool-btn cmd" data-cmd="🎵音乐">🎵音乐</button>
+          <button type="button" class="tool-btn cmd" data-cmd="🎬电影">🎬电影</button>
+          <button type="button" class="tool-btn cmd" data-cmd="⛅天气">⛅天气</button>
+          <button type="button" class="tool-btn cmd" data-cmd="📰新闻">📰新闻</button>
+          <button type="button" class="tool-btn cmd" data-cmd="📺b站视频">📺b站视频</button>
+          <button type="button" id="historyBtn" class="tool-btn">🕘 历史记录</button>
+        </div>
+        <div id="emojiPicker" class="emoji-picker">
+          <div class="emoji-grid">
+            <span class="emoji-item" data-emoji="😀">😀</span>
+            <span class="emoji-item" data-emoji="😂">😂</span>
+            <span class="emoji-item" data-emoji="😍">😍</span>
+            <span class="emoji-item" data-emoji="🤔">🤔</span>
+            <span class="emoji-item" data-emoji="🚀">🚀</span>
+            <span class="emoji-item" data-emoji="💡">💡</span>
+            <span class="emoji-item" data-emoji="👍">👍</span>
+            <span class="emoji-item" data-emoji="🎉">🎉</span>
+            <span class="emoji-item" data-emoji="🫡">🫡</span>
+            <span class="emoji-item" data-emoji="🔥">🔥</span>
+            <span class="emoji-item" data-emoji="✨">✨</span>
+            <span class="emoji-item" data-emoji="🙂">🙂</span>
+            <span class="emoji-item" data-emoji="😄">😄</span>
+          </div>
+        </div>
+        <div class="tools">
+          <textarea id="input" class="input"
+            placeholder="输入消息，支持 🤖成小理 🎵音乐 🎬电影 ⛅天气 📰新闻 📺b站视频，支持emoji，如 😀"></textarea>
+          <button id="send" class="send">发送</button>
+        </div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:6px">Enter 发送，Shift+Enter 换行</div>
+      </div>
+    </main>
+  </div>
+
+  <script>(function () { var s = document.createElement('script'); s.src = '/static/vendor/jquery-3.7.1.min.js'; s.onerror = function () { var c = document.createElement('script'); c.src = 'https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js'; document.head.appendChild(c); }; document.head.appendChild(s); }());</script>
+  <script>
+    (function () {
+      var nick = "{{ nick }}";
+      var server = "{{ server }}";
+      var room = "{{ room }}";
+      var ws;
+      var closingForSwitch = false;
+
+      var users = new Set();
+      var canSend = false;
+      var $messages = document.getElementById('messages');
+      var $input = document.getElementById('input');
+      var $send = document.getElementById('send');
+      var $roomName = document.getElementById('roomName');
+      var emojiBtn = document.getElementById('emojiBtn');
+      var emojiPicker = document.getElementById('emojiPicker');
+      var historyBtn = document.getElementById('historyBtn');
+      var roomContainers = {};
+      var currentContainer = null;
+      function ensureRoomContainer(name) {
+        if (!roomContainers[name]) {
+          var c = document.createElement('div');
+          c.dataset.room = name;
+          c.style.display = 'none';
+          $messages.appendChild(c);
+          roomContainers[name] = c;
+        }
+        return roomContainers[name];
+      }
+      function showRoom(name) {
+        var target = ensureRoomContainer(name);
+        Object.keys(roomContainers).forEach(function (k) { roomContainers[k].style.display = (k === name) ? 'block' : 'none'; });
+        currentContainer = target;
+        scrollBottom();
+      }
+
+      function escapeHtml(s) {
+        return s.replace(/[&<>]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] });
+      }
+      function fmtContent(text) {
+        var t = escapeHtml(text)
+          .replace(/((🤖成小理|🎵音乐|🎬电影|⛅天气|📰新闻|📺b站视频|@[\w]+))/g, '<span class="tag">$1</span>')
+          .replace(/\n/g, '<br>');
+        return t;
+      }
+      function chineseOnly(text) {
+        return String(text).replace(/[^\u4e00-\u9fff0-9\s，。！？、；：（）《》“”‘’…—·]/g, '');
+      }
+      function addSystem(content) {
+        var d = document.createElement('div');
+        d.className = 'system';
+        d.innerHTML = '<span>' + escapeHtml(content) + '</span>';
+        (currentContainer || ensureRoomContainer(room)).appendChild(d);
+        scrollBottom();
+      }
+      function renderUserItem(n) {
+        var item = document.createElement('div');
+        item.className = 'user-item';
+        var img = document.createElement('img');
+        img.className = 'avatar';
+        img.src = 'https://design.gemcoder.com/staticResource/echoAiSystemImages/a36d0ecd9f2c6eb5b1d0d8c346f85d87.png';
+        var name = document.createElement('span');
+        name.textContent = n;
+        if (n === nick) { name.className = 'name-blue'; }
+        var dot = document.createElement('span');
+        dot.className = 'dot';
+        item.appendChild(img); item.appendChild(name); item.appendChild(dot);
+        item.dataset.nick = n;
+        document.getElementById('userList').appendChild(item);
+      }
+      function updateUserCount() { var cEl = document.getElementById('userCount'); if (cEl) cEl.textContent = String(users.size); }
+      function addUser(n) { if (!users.has(n)) { users.add(n); renderUserItem(n); updateUserCount(); } }
+      function removeUser(n) { if (users.delete(n)) { var list = document.getElementById('userList'); var el = list.querySelector('[data-nick="' + CSS.escape(n) + '"]'); if (el) list.removeChild(el); updateUserCount(); } }
+      function parseSystemUser(text) {
+        var m = text.match(/^(.+?) 加入了房间/); if (m) return { nick: m[1], action: 'join' };
+        m = text.match(/^(.+?) 离开了房间/); if (m) return { nick: m[1], action: 'leave' };
+        return null;
+      }
+      function addMsg(sender, content) {
+        var row = document.createElement('div');
+        row.className = 'row' + (sender === nick ? ' user' : '');
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (sender === nick ? 'user' : 'other');
+        var t = new Date();
+        var ts = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        var nameCls = sender === nick ? 'name-blue' : '';
+        bubble.innerHTML = '<div class="meta"><span class="' + nameCls + '">' + escapeHtml(sender) + '</span><span class="time-gray">' + ts + '</span></div>' + fmtContent(content);
+        row.appendChild(bubble);
+        (currentContainer || ensureRoomContainer(room)).appendChild(row);
+        scrollBottom();
+      }
+
+      var historyOverlay = (function () {
+        var el = document.createElement('div');
+        el.id = 'historyOverlay';
+        el.style.position = 'fixed';
+        el.style.left = '0';
+        el.style.top = '0';
+        el.style.right = '0';
+        el.style.bottom = '0';
+        el.style.background = 'rgba(0,0,0,0.6)';
+        el.style.display = 'none';
+        el.style.zIndex = '1000';
+        var panel = document.createElement('div');
+        panel.style.position = 'absolute';
+        panel.style.right = '20px';
+        panel.style.top = '20px';
+        panel.style.bottom = '20px';
+        panel.style.width = '420px';
+        panel.style.background = '#0e1626';
+        panel.style.border = '1px solid #1f2a3a';
+        panel.style.borderRadius = '12px';
+        panel.style.display = 'flex';
+        panel.style.flexDirection = 'column';
+        var header = document.createElement('div');
+        header.style.padding = '12px 16px';
+        header.style.borderBottom = '1px solid #1f2a3a';
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        var title = document.createElement('div');
+        title.textContent = '历史记录';
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = '关闭';
+        closeBtn.className = 'tool-btn';
+        header.appendChild(title); header.appendChild(closeBtn);
+        var progress = document.createElement('div');
+        progress.className = 'history-progress';
+        var progressBar = document.createElement('div');
+        progressBar.className = 'bar';
+        progress.appendChild(progressBar);
+        var list = document.createElement('div');
+        list.style.flex = '1';
+        list.style.overflow = 'auto';
+        list.style.padding = '12px 16px';
+        list.className = 'history-list';
+        var footer = document.createElement('div');
+        footer.style.padding = '12px 16px';
+        footer.style.borderTop = '1px solid #1f2a3a';
+        var moreBtn = document.createElement('button');
+        moreBtn.textContent = '加载更多';
+        moreBtn.className = 'tool-btn';
+        var clearBtn = document.createElement('button');
+        clearBtn.textContent = '清空聊天记录';
+        clearBtn.className = 'tool-btn danger-btn';
+        clearBtn.style.marginLeft = '8px';
+        footer.appendChild(moreBtn);
+        footer.appendChild(clearBtn);
+        var confirmBox = document.createElement('div');
+        confirmBox.className = 'confirm-box';
+        var confirmText = document.createElement('div');
+        confirmText.textContent = '是否确定清除当前房间历史记录？';
+        confirmText.style.marginBottom = '8px';
+        var confirmActions = document.createElement('div');
+        var btnCancel = document.createElement('button');
+        btnCancel.textContent = '取消';
+        btnCancel.className = 'tool-btn';
+        var btnOk = document.createElement('button');
+        btnOk.textContent = '确定';
+        btnOk.className = 'tool-btn danger-btn';
+        btnOk.style.marginLeft = '8px';
+        confirmActions.appendChild(btnCancel);
+        confirmActions.appendChild(btnOk);
+        confirmBox.appendChild(confirmText);
+        confirmBox.appendChild(confirmActions);
+        footer.appendChild(confirmBox);
+        panel.appendChild(header); panel.appendChild(progress); panel.appendChild(list); panel.appendChild(footer);
+        el.appendChild(panel);
+        document.body.appendChild(el);
+        return { root: el, list: list, closeBtn: closeBtn, moreBtn: moreBtn, clearBtn: clearBtn, progressBar: progressBar, confirmBox: confirmBox, btnOk: btnOk, btnCancel: btnCancel };
+      })();
+
+      var historyMinTs = null;
+      function renderHistory(items) {
+        items.forEach(function (it) {
+          var row = document.createElement('div');
+          row.style.margin = '8px 0';
+          var nameCls = it.sender === nick ? 'name-blue' : '';
+          var dt = new Date(it.ts);
+          var hh = String(dt.getHours()).padStart(2, '0');
+          var mm = String(dt.getMinutes()).padStart(2, '0');
+          var meta = '<div class="meta"><span class="' + nameCls + '">' + escapeHtml(it.sender) + '</span><span class="time-gray">' + hh + ':' + mm + '</span></div>';
+          var bubble = document.createElement('div');
+          bubble.className = 'bubble other';
+          if (it.sender === nick) { bubble.className = 'bubble user'; }
+          bubble.innerHTML = meta + fmtContent(it.content || '');
+          row.appendChild(bubble);
+          historyOverlay.list.appendChild(row);
+          if (historyMinTs === null || it.ts < historyMinTs) { historyMinTs = it.ts; }
+        });
+      }
+
+      function startProgress() {
+        if (!historyOverlay.progressBar) return;
+        historyOverlay.progressBar.style.width = '0%';
+        historyOverlay.progressBar.style.opacity = '1';
+        setTimeout(function () { historyOverlay.progressBar.style.width = '40%'; }, 30);
+      }
+      function finishProgress() {
+        if (!historyOverlay.progressBar) return;
+        historyOverlay.progressBar.style.width = '100%';
+        setTimeout(function () { historyOverlay.progressBar.style.opacity = '0'; historyOverlay.progressBar.style.width = '0%'; }, 300);
+      }
+      function fetchHistory(beforeTs) {
+        startProgress();
+        var url = '/history?room=' + encodeURIComponent(room) + '&limit=50&order=desc';
+        if (beforeTs) { url += '&before_ts=' + beforeTs; }
+        return fetch(url)
+          .then(function (r) { return r.json(); })
+          .then(function (res) { finishProgress(); return (res && res.items) || []; })
+          .catch(function () { finishProgress(); return []; });
+      }
+
+      function openHistory() {
+        historyOverlay.list.innerHTML = '';
+        historyMinTs = null;
+        fetchHistory(null).then(function (items) { renderHistory(items); historyOverlay.root.style.display = 'block'; });
+      }
+
+      function closeHistory() { historyOverlay.root.style.display = 'none'; }
+
+      historyBtn.addEventListener('click', openHistory);
+      historyOverlay.closeBtn.addEventListener('click', closeHistory);
+      historyOverlay.moreBtn.addEventListener('click', function () { if (historyMinTs) { fetchHistory(historyMinTs).then(renderHistory); } });
+      historyOverlay.clearBtn.addEventListener('click', function () { historyOverlay.moreBtn.style.display = 'none'; historyOverlay.clearBtn.style.display = 'none'; historyOverlay.confirmBox.style.display = 'block'; });
+      historyOverlay.btnCancel.addEventListener('click', function () { historyOverlay.confirmBox.style.display = 'none'; historyOverlay.moreBtn.style.display = ''; historyOverlay.clearBtn.style.display = ''; });
+      historyOverlay.btnOk.addEventListener('click', function () {
+        historyOverlay.confirmBox.style.display = 'none'; historyOverlay.moreBtn.style.display = ''; historyOverlay.clearBtn.style.display = '';
+        startProgress();
+        fetch('/api/clear_history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room: room }) })
+          .then(function (r) { return r.json(); })
+          .then(function (res) { finishProgress(); if (res && res.code === 0) { historyOverlay.list.innerHTML = ''; historyMinTs = null; var cont = (currentContainer || ensureRoomContainer(room)); if (cont) { cont.innerHTML = ''; } addSystem('已清空历史记录'); } else { alert((res && res.message) || '清空失败'); } })
+          .catch(function () { finishProgress(); alert('清空接口异常'); });
+      });
+
+      function addMusicCard(sender, music) {
+        var row = document.createElement('div');
+        row.className = 'row' + (sender === nick ? ' user' : '');
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (sender === nick ? 'user' : 'other');
+        var t = new Date();
+        var ts = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        var nameCls = sender === nick ? 'name-blue' : '';
+
+        var meta = '<div class="meta"><span class="' + nameCls + '">' + escapeHtml(sender) + '</span><span class="time-gray">' + ts + '</span></div>';
+        var cardHtml = '<div class="music-card">' +
+          '<img src="' + (music.cover || '') + '" class="music-cover" onerror="this.style.display=\'none\'">' +
+          '<div class="music-info">' +
+          '<div class="music-title">' + escapeHtml(music.name || '未知歌曲') + '</div>' +
+          '<div class="music-singer">' + escapeHtml(music.singer || '未知歌手') + '</div>' +
+          '</div>' +
+          '<audio controls src="' + (music.url || '') + '" style="width:100%;height:32px;"></audio>' +
+          '</div>';
+
+        bubble.innerHTML = meta + cardHtml;
+        row.appendChild(bubble);
+        (currentContainer || ensureRoomContainer(room)).appendChild(row);
+        scrollBottom();
+      }
+
+      function addWeatherCard(sender, weather) {
+        var row = document.createElement('div');
+        row.className = 'row' + (sender === nick ? ' user' : '');
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (sender === nick ? 'user' : 'other');
+        var t = new Date();
+        var ts = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        var nameCls = sender === nick ? 'name-blue' : '';
+
+        var meta = '<div class="meta"><span class="' + nameCls + '">' + escapeHtml(sender) + '</span><span class="time-gray">' + ts + '</span></div>';
+
+        var cardHtml = '<div class="weather-card">' +
+          '<div class="weather-header">' +
+          '<div class="weather-city">' + escapeHtml(weather.city) + '</div>' +
+          '<div class="weather-date">' + escapeHtml(weather.date) + ' ' + escapeHtml(weather.day) + '</div>' +
+          '</div>' +
+          '<div class="weather-main">' +
+          '<div class="weather-temp">' + escapeHtml(weather.current_temp) + '°</div>' +
+          '<div>' +
+          '<div class="weather-desc">' + escapeHtml(weather.weather) + '</div>' +
+          '<div style="font-size:12px;opacity:0.9">' + escapeHtml(weather.temp_range) + '</div>' +
+          '</div>' +
+          '</div>' +
+          '<div class="weather-details">' +
+          '<div class="weather-detail-item"><span class="weather-label">风向</span><span>' + escapeHtml(weather.wind) + '</span></div>' +
+          '<div class="weather-detail-item"><span class="weather-label">湿度</span><span>' + escapeHtml(weather.humidity) + '</span></div>' +
+          '<div class="weather-detail-item" style="grid-column:span 2;margin-top:4px"><span class="weather-label">提示</span><span>' + escapeHtml(weather.description) + '</span></div>' +
+          '</div>' +
+          '</div>';
+
+        bubble.innerHTML = meta + cardHtml;
+        row.appendChild(bubble);
+        (currentContainer || ensureRoomContainer(room)).appendChild(row);
+        scrollBottom();
+      }
+
+      function addMovieCard(sender, movie) {
+        var row = document.createElement('div');
+        row.className = 'row' + (sender === nick ? ' user' : '');
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (sender === nick ? 'user' : 'other');
+
+        bubble.style.maxWidth = '100%';
+        bubble.style.width = 'auto';
+        bubble.style.padding = '12px';
+
+        var t = new Date();
+        var ts = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        var nameCls = sender === nick ? 'name-blue' : '';
+
+        var meta = '<div class="meta"><span class="' + nameCls + '">' + escapeHtml(sender) + '</span><span class="time-gray">' + ts + '</span></div>';
+
+        var cardHtml = '<div class="movie-card" style="margin-top:6px;max-width:400px;">' +
+          '<iframe src="' + (movie.src || '') + '" style="width:100%;border:none;border-radius:8px;background:#000;aspect-ratio:16/9;" allowfullscreen></iframe>' +
+          '</div>';
+
+        bubble.innerHTML = meta + cardHtml;
+        row.appendChild(bubble);
+        (currentContainer || ensureRoomContainer(room)).appendChild(row);
+        var iframeEl = bubble.querySelector('iframe');
+        function fitIframe(el) {
+          if (!el) return;
+          if (!(window.CSS && CSS.supports && CSS.supports('aspect-ratio: 16/9'))) {
+            var w = el.offsetWidth || 400;
+            el.style.height = Math.round(w * 9 / 16) + 'px';
+          } else {
+            el.style.height = '';
+          }
+        }
+        fitIframe(iframeEl);
+        window.addEventListener('resize', function () { fitIframe(iframeEl); });
+        scrollBottom();
+      }
+
+      function addNewsCard(sender, list) {
+        var row = document.createElement('div');
+        row.className = 'row' + (sender === nick ? ' user' : '');
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (sender === nick ? 'user' : 'other');
+        bubble.style.maxWidth = '100%';
+        bubble.style.width = 'auto';
+        bubble.style.padding = '12px';
+        var t = new Date();
+        var ts = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        var nameCls = sender === nick ? 'name-blue' : '';
+        var meta = '<div class="meta"><span class="' + nameCls + '">' + escapeHtml(sender) + '</span><span class="time-gray">' + ts + '</span></div>';
+        var html = '<div class="news-card">';
+        var items = Array.isArray(list) ? list : [];
+        items.forEach(function (it) {
+          var img = (it.image || '').replace(/`/g, '').trim();
+          var url = (it.url || '').replace(/`/g, '').trim();
+          var time = escapeHtml(it.time || '');
+          var title = escapeHtml(it.title || '');
+          var brief = escapeHtml(it.brief || '');
+          html += '<div class="news-item">' +
+            '<img class="news-thumb" src="' + img + '" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">' +
+            '<div>' +
+            '<div class="news-title">' + title + '</div>' +
+            '<div class="news-brief">' + brief + '</div>' +
+            '<div class="news-meta"><span>' + time + '</span><a class="news-link" target="_blank" href="' + url + '">阅读原文</a></div>' +
+            '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+        bubble.innerHTML = meta + html;
+        row.appendChild(bubble);
+        (currentContainer || ensureRoomContainer(room)).appendChild(row);
+        scrollBottom();
+      }
+
+      function addBilibiliCard(sender, movie) {
+        var row = document.createElement('div');
+        row.className = 'row' + (sender === nick ? ' user' : '');
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (sender === nick ? 'user' : 'other');
+
+        bubble.style.maxWidth = '100%';
+        bubble.style.width = 'auto';
+        bubble.style.padding = '12px';
+
+        var t = new Date();
+        var ts = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        var nameCls = sender === nick ? 'name-blue' : '';
+
+        var meta = '<div class="meta"><span class="' + nameCls + '">' + escapeHtml(sender) + '</span><span class="time-gray">' + ts + '</span></div>';
+
+        var coverHtml = '';
+        if (movie.cover) {
+          coverHtml = '<div style="margin-bottom:8px;border-radius:6px;overflow:hidden;max-height:200px;">' +
+            '<img src="' + escapeHtml(movie.cover) + '" style="width:100%;object-fit:cover;" referrerpolicy="no-referrer">' +
+            '</div>';
+        }
+
+        var titleHtml = '';
+        if (movie.title) {
+          titleHtml = '<div style="font-weight:bold;font-size:14px;margin-bottom:6px;color:#fff;">' + escapeHtml(movie.title) + '</div>';
+        }
+
+        var cardHtml = '<div class="movie-card" style="margin-top:6px;max-width:400px;">' +
+          coverHtml +
+          titleHtml +
+          '<video controls src="' + (movie.src || '') + '" style="width:100%;max-width:400px;border-radius:8px;background:#000;"></video>' +
+          '</div>';
+
+        bubble.innerHTML = meta + cardHtml;
+        row.appendChild(bubble);
+        (currentContainer || ensureRoomContainer(room)).appendChild(row);
+        scrollBottom();
+      }
+
+      function addStreamingBubble(sender) {
+        var row = document.createElement('div');
+        row.className = 'row' + (sender === nick ? ' user' : '');
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (sender === nick ? 'user' : 'other');
+        var t = new Date();
+        var ts = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        var nameCls = sender === nick ? 'name-blue' : '';
+        var meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.innerHTML = '<span class="' + nameCls + '">' + escapeHtml(sender) + '</span><span class="time-gray">' + ts + '</span>';
+        var contentDiv = document.createElement('div');
+        contentDiv.className = 'stream-content';
+        bubble.appendChild(meta);
+        bubble.appendChild(contentDiv);
+        row.appendChild(bubble);
+        var userRows = (currentContainer || ensureRoomContainer(room)).querySelectorAll('.row.user');
+        var anchor = userRows.length ? userRows[userRows.length - 1] : null;
+        if (anchor && anchor.parentNode) { anchor.parentNode.insertBefore(row, anchor.nextSibling); } else { (currentContainer || ensureRoomContainer(room)).appendChild(row); }
+        scrollBottom();
+        return contentDiv;
+      }
+      function scrollBottom() { $messages.scrollTop = $messages.scrollHeight; }
+
+      function connect() {
+        if (ws && ws.readyState !== 3) {
+          closingForSwitch = true;
+          try { ws.close(); } catch (e) { }
+        }
+        var url = server + '?room=' + encodeURIComponent(room) + '&nick=' + encodeURIComponent(nick);
+        ws = new WebSocket(url);
+        canSend = false;
+        $send.disabled = true;
+        ws.onopen = function () {
+          addSystem('已连接到服务器 ' + server);
+          canSend = true;
+          $send.disabled = false;
+        };
+        ws.onmessage = function (ev) {
+          var data = {};
+          try { data = JSON.parse(ev.data); } catch (e) { data = { type: 'message', sender: '服务器', content: ev.data }; }
+          if (data.type === 'system') {
+            addSystem(data.content);
+            var info = parseSystemUser(String(data.content));
+            if (info) { if (info.action === 'join') { addUser(info.nick); } else { removeUser(info.nick); } }
+          } else if (data.type === 'music_card') {
+            addMusicCard(data.sender, data.content);
+          } else if (data.type === 'weather_card') {
+            addWeatherCard(data.sender, data.content);
+          } else if (data.type === 'movie_card') {
+            addMovieCard(data.sender, data.content);
+          } else if (data.type === 'bilibili_card') {
+            addBilibiliCard(data.sender, data.content);
+          } else if (data.type === 'news_card') {
+            addNewsCard(data.sender, data.content);
+          } else {
+            addMsg(data.sender, data.content);
+            if (data.sender === nick && data.content && data.content.includes('🤖成小理')) {
+              startAIStream(data.content);
+            }
+          }
+        };
+        ws.onclose = function () { if (!closingForSwitch) { addSystem('连接已关闭'); } closingForSwitch = false; canSend = false; $send.disabled = true; };
+        ws.onerror = function () { addSystem('连接发生错误'); canSend = false; $send.disabled = true; };
+      }
+
+      function send() {
+        var text = ($input.value || '').trim();
+        if (!text) return;
+        if (!(ws && ws.readyState === 1)) {
+          addSystem('连接未就绪，请稍后再试');
+          return;
+        }
+        ws.send(JSON.stringify({ content: text }));
+        $input.value = '';
+        autoResize();
+      }
+
+      function autoResize() {
+        $input.style.height = 'auto';
+        var mh = 160; var h = Math.min($input.scrollHeight, mh);
+        $input.style.height = h + 'px';
+      }
+
+      function insertAtCursor(el, txt) {
+        var s = el.selectionStart || 0;
+        var e = el.selectionEnd || 0;
+        var val = el.value || '';
+        el.value = val.slice(0, s) + txt + val.slice(e);
+        var pos = s + txt.length;
+        el.setSelectionRange(pos, pos);
+        el.focus();
+        autoResize();
+      }
+
+      function startAIStream(prompt) {
+        var contentDiv = addStreamingBubble('成小理');
+        var acc = '';
+        var es = new EventSource('/ai?prompt=' + encodeURIComponent(prompt));
+        es.onmessage = function (ev) {
+          if (ev.data === '[DONE]') { es.close(); return; }
+          try {
+            var obj = JSON.parse(ev.data);
+            var part = obj.choices && obj.choices[0] && obj.choices[0].delta && obj.choices[0].delta.content || '';
+            if (part) { acc += chineseOnly(part); contentDiv.innerHTML = fmtContent(acc); scrollBottom(); }
+          } catch (e) {
+            if (ev.data) { acc += chineseOnly(ev.data); contentDiv.innerHTML = fmtContent(acc); scrollBottom(); }
+          }
+        };
+        es.onerror = function () { es.close(); addSystem('成小理接口发生错误'); };
+      }
+
+      document.querySelectorAll('.room').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var targetRoom = this.getAttribute('data-room');
+          if (targetRoom === room) { return; }
+          document.querySelectorAll('.room').forEach(function (x) { x.classList.remove('active'); });
+          this.classList.add('active');
+          room = targetRoom;
+          $roomName.textContent = '# ' + this.textContent.trim().replace('#', '');
+          document.getElementById('userList').innerHTML = '';
+          users.clear();
+          closingForSwitch = true;
+          try { ws && ws.close(); } catch (e) { }
+          addSystem('已切换到 ' + $roomName.textContent + ' 房间');
+          showRoom(room);
+          connect();
+        });
+      });
+
+      document.getElementById('logout').addEventListener('click', function () {
+        location.href = '/login';
+      });
+
+      $send.addEventListener('click', send);
+      $input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+      });
+      $input.addEventListener('input', autoResize);
+
+      document.querySelectorAll('.cmd').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var t = this.getAttribute('data-cmd');
+          var insertOnly = ['🤖成小理', '🎬电影', '⛅天气', '📺b站视频'];
+          insertAtCursor($input, t + ' ');
+          if (insertOnly.indexOf(t) !== -1) { $input.focus(); autoResize(); }
+          else { send(); }
+        });
+      });
+
+      emojiBtn.addEventListener('click', function () {
+        emojiPicker.style.display = emojiPicker.style.display === 'none' || !emojiPicker.style.display ? 'block' : 'none';
+      });
+      emojiPicker.querySelectorAll('.emoji-item').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var em = this.getAttribute('data-emoji');
+          insertAtCursor($input, em);
+        });
+      });
+      document.addEventListener('click', function (e) {
+        if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
+          emojiPicker.style.display = 'none';
+        }
+      });
+
+      autoResize();
+      showRoom(room);
+      connect();
+      addUser(nick);
+
+
+    })();
+  </script>
+</body>
+
+</html>

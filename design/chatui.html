@@ -1,0 +1,666 @@
+<html lang='zh-CN'>
+        <head >
+        <meta charset='UTF-8'/>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+<title >AI 智能聊天室</title>
+<!-- 引入 Tailwind CSS -->
+<script src='https://res.gemcoder.com/js/reload.js'></script>
+<script src='https://cdn.tailwindcss.com'></script>
+<!-- 引入 Font Awesome -->
+<link rel='stylesheet' href='https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css'/>
+<style >
+        /* 自定义深色背景和渐变效果，参考图片模板 */
+        body {
+            background-color: #0a0a1a; /* 深蓝色背景 */
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+        }
+        /* 模拟图片模板中的亮蓝色 */
+        .text-ai-blue {
+            color: #3b82f6; /* blue-500 */
+        }
+        .bg-ai-blue {
+            background-color: #3b82f6; /* blue-500 */
+        }
+        .hover\:bg-ai-blue:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+        /* 聊天气泡样式 */
+        .chat-message {
+            max-width: 80%;
+        }
+        /* 滚动条美化 */
+        #chat-window::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-window::-webkit-scrollbar-track {
+            background: #1f2937; /* dark gray track */
+        }
+        #chat-window::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray thumb */
+            border-radius: 4px;
+        }
+        #chat-window::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+    </style>
+    </head>
+<body class='min-h-screen flex antialiased'>
+        <!-- 主容器 -->
+<div id='app-container' class='flex w-full h-screen overflow-hidden'>
+        <!-- 侧边栏：房间列表和用户列表 -->
+<!-- [MODULE] 4aB_侧边栏 -->
+<aside id='sidebar' class='w-64 bg-gray-900/70 border-r border-gray-700 flex flex-col p-4 shadow-2xl'>
+        <!-- [MODULE] 4aB_侧边栏:应用标题 -->
+<div class='mb-6 pb-3 border-b border-gray-700'>
+        <h1 class='text-2xl font-bold text-white'>
+        <span class='text-ai-blue'>
+        AI
+    </span>
+Chat
+    </h1>
+<p class='text-xs text-gray-400 mt-1'>
+        Local Dev Mode
+    </p>
+    </div>
+<!-- [/MODULE] 4aB_侧边栏:应用标题 -->
+<!-- [MODULE] 4aB_侧边栏:房间列表 -->
+<div class='mb-6'>
+        <h2 class='text-sm font-semibold text-gray-300 mb-2 flex items-center'>
+        <i class='fas fa-users mr-2 text-ai-blue'>
+        </i>
+聊天房间
+    </h2>
+<div id='room-list' class='space-y-2 text-sm'>
+        <!-- 房间项 -->
+<div class='room-item p-2 rounded-lg cursor-pointer transition duration-150 bg-gray-700/50 border border-ai-blue/50' data-room-id='general'>
+        <i class='fas fa-hashtag mr-2 text-gray-400'>
+        </i>
+<span class='font-medium text-white'>
+        # General Chat
+    </span>
+<span class='float-right text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center'>
+        3
+    </span>
+    </div>
+<div class='room-item p-2 rounded-lg cursor-pointer hover:bg-gray-700/30 transition duration-150' data-room-id='ai-dev'>
+        <i class='fas fa-hashtag mr-2 text-gray-400'>
+        </i>
+<span class='font-medium'>
+        # AI Development
+    </span>
+    </div>
+<div class='room-item p-2 rounded-lg cursor-pointer hover:bg-gray-700/30 transition duration-150' data-room-id='music'>
+        <i class='fas fa-hashtag mr-2 text-gray-400'>
+        </i>
+<span class='font-medium'>
+        # Music & Fun
+    </span>
+    </div>
+    </div>
+<button class='mt-3 w-full text-xs text-gray-400 hover:text-ai-blue transition flex items-center justify-center p-1 border border-dashed border-gray-700 rounded-md hover:border-ai-blue/50'>
+        <i class='fas fa-plus mr-1'>
+        </i>
+创建新房间
+    </button>
+    </div>
+<!-- [/MODULE] 4aB_侧边栏:房间列表 -->
+<!-- [MODULE] 4aB_侧边栏:用户列表 -->
+<div >
+        <h2 class='text-sm font-semibold text-gray-300 mb-2 flex items-center'>
+        <i class='fas fa-user-friends mr-2 text-ai-blue'>
+        </i>
+在线用户 (5)
+    </h2>
+<div id='user-list' class='space-y-2 text-sm overflow-y-auto max-h-40'>
+        <!-- 用户项 -->
+<div class='flex items-center p-1 rounded-lg hover:bg-gray-700/30 transition duration-150'>
+        <div class='relative'>
+        <img src='https://design.gemcoder.com/staticResource/echoAiSystemImages/a36d0ecd9f2c6eb5b1d0d8c346f85d87.png' class='w-8 h-8 rounded-full object-cover mr-2 border border-green-500' alt='User Avatar'/>
+<span class='absolute bottom-0 right-1 block h-2 w-2 rounded-full ring-2 ring-gray-900 bg-green-500'>
+        </span>
+    </div>
+<span class='font-medium text-white truncate'>
+        You (Admin)
+    </span>
+    </div>
+<div class='flex items-center p-1 rounded-lg hover:bg-gray-700/30 transition duration-150'>
+        <div class='relative'>
+        <img src='https://design.gemcoder.com/staticResource/echoAiSystemImages/9ed0ddaf94c5e83f968682293cd6cd01.png' class='w-8 h-8 rounded-full object-cover mr-2 border border-gray-700' alt='User Avatar'/>
+<span class='absolute bottom-0 right-1 block h-2 w-2 rounded-full ring-2 ring-gray-900 bg-yellow-500'>
+        </span>
+    </div>
+<span class='font-medium'>
+        Alice_Dev
+    </span>
+    </div>
+<div class='flex items-center p-1 rounded-lg hover:bg-gray-700/30 transition duration-150'>
+        <div class='relative'>
+        <img src='https://design.gemcoder.com/staticResource/echoAiSystemImages/cf266fa96ce5f14417a5ce9a878c98e4.png' class='w-8 h-8 rounded-full object-cover mr-2 border border-gray-700' alt='User Avatar'/>
+<span class='absolute bottom-0 right-1 block h-2 w-2 rounded-full ring-2 ring-gray-900 bg-green-500'>
+        </span>
+    </div>
+<span class='font-medium'>
+        Bob_Coder
+    </span>
+    </div>
+<div class='flex items-center p-1 rounded-lg hover:bg-gray-700/30 transition duration-150'>
+        <div class='relative'>
+        <img src='https://design.gemcoder.com/staticResource/echoAiSystemImages/53de0e9d96f47ac0c4fa377668e8840d.png' class='w-8 h-8 rounded-full object-cover mr-2 border border-gray-700' alt='User Avatar'/>
+<span class='absolute bottom-0 right-1 block h-2 w-2 rounded-full ring-2 ring-gray-900 bg-gray-500'>
+        </span>
+    </div>
+<span class='font-medium'>
+        Guest_User
+    </span>
+    </div>
+    </div>
+    </div>
+<!-- [/MODULE] 4aB_侧边栏:用户列表 -->
+    </aside>
+<!-- [/MODULE] 4aB_侧边栏 -- 包含房间列表和用户列表，用于导航和状态展示 -->
+<!-- 主内容区域：聊天界面 -->
+<!-- [MODULE] 8cE_聊天主界面 -->
+<main class='flex-1 flex flex-col bg-gray-900/50 relative'>
+        <!-- 顶部：房间信息和操作 -->
+<!-- [MODULE] 8cE_聊天主界面:顶部标题栏 -->
+<header class='p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800/50 shadow-lg z-10'>
+        <div class='flex items-center'>
+        <i class='fas fa-hashtag mr-2 text-ai-blue text-xl'>
+        </i>
+<h2 id='current-room-name' class='text-xl font-semibold text-white'>
+        # General Chat
+    </h2>
+<span class='ml-3 text-sm text-gray-400 border border-gray-600 px-2 py-0.5 rounded-full'>
+        5 Members
+    </span>
+    </div>
+<div class='flex space-x-3'>
+        <button title='AI 助手设置' class='text-gray-400 hover:text-ai-blue transition p-2 rounded-full hover:bg-gray-700'>
+        <i class='fas fa-robot'>
+        </i>
+    </button>
+<button title='搜索' class='text-gray-400 hover:text-ai-blue transition p-2 rounded-full hover:bg-gray-700'>
+        <i class='fas fa-search'>
+        </i>
+    </button>
+<button title='更多选项' class='text-gray-400 hover:text-ai-blue transition p-2 rounded-full hover:bg-gray-700'>
+        <i class='fas fa-ellipsis-v'>
+        </i>
+    </button>
+    </div>
+    </header>
+<!-- [/MODULE] 8cE_聊天主界面:顶部标题栏 -->
+<!-- 聊天窗口 -->
+<!-- [MODULE] 8cE_聊天主界面:消息展示区 -->
+<div id='chat-window' class='flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar'>
+        <!-- 欢迎/系统消息 -->
+<div class='text-center text-sm text-gray-400 pt-4'>
+        <div class='inline-block bg-gray-800/50 px-4 py-2 rounded-xl shadow-lg border border-gray-700'>
+        <i class='fas fa-robot mr-2 text-ai-blue'>
+        </i>
+欢迎来到 # General Chat。您已登录。
+    </div>
+    </div>
+<!-- 示例消息：用户发送 -->
+<div class='flex justify-end'>
+        <div class='chat-message bg-ai-blue text-white p-3 rounded-tl-xl rounded-tr-xl rounded-bl-xl shadow-lg'>
+        <div class='flex items-center mb-1'>
+        <span class='font-bold mr-2'>
+        You
+    </span>
+<span class='text-xs text-white/70'>
+        10:30 AM
+    </span>
+    </div>
+<p >
+        大家好，我们今天开始本地AI开发模式的测试！
+    </p>
+    </div>
+    </div>
+<!-- 示例消息：AI回复 -->
+<div class='flex justify-start'>
+        <div class='flex items-start space-x-3'>
+        <img src='https://design.gemcoder.com/staticResource/echoAiSystemImages/72713b3a1045ecaf9955811de47d1d45.png' class='w-10 h-10 rounded-full object-cover mt-1 border border-ai-blue' alt='AI Avatar'/>
+<div class='chat-message bg-gray-700/70 text-white p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl shadow-lg'>
+        <div class='flex items-center mb-1'>
+        <span class='font-bold text-ai-blue mr-2'>
+        AI Assistant
+    </span>
+<span class='text-xs text-gray-300/70'>
+        10:31 AM
+    </span>
+    </div>
+<p >
+        很高兴为您服务！我已经准备好进行本地AI开发模式的体验。请问有什么需要我协助构建的吗？
+    </p>
+<!-- AI 特殊功能回复 -->
+<div class='mt-2 pt-2 border-t border-gray-600/50 text-sm'>
+        <p class='text-gray-300'>
+        <i class='fas fa-music mr-1 text-pink-400'>
+        </i>
+正在处理 @音乐 请求... 🎵
+    </p>
+    </div>
+    </div>
+    </div>
+    </div>
+<!-- 示例消息：@用户 -->
+<div class='flex justify-start'>
+        <div class='flex items-start space-x-3'>
+        <img src='https://design.gemcoder.com/staticResource/echoAiSystemImages/08a85b0d22fbb7b9ab370be18192c92c.png' class='w-10 h-10 rounded-full object-cover mt-1 border border-gray-700' alt='User Avatar'/>
+<div class='chat-message bg-gray-700/70 text-white p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl shadow-lg'>
+        <div class='flex items-center mb-1'>
+        <span class='font-bold mr-2 text-red-400'>
+        Alice_Dev
+    </span>
+<span class='text-xs text-gray-300/70'>
+        10:32 AM
+    </span>
+    </div>
+<p >
+        @You 看看这个设计，感觉怎么样？
+<i class='fas fa-grin-stars text-yellow-400'>
+        </i>
+    </p>
+    </div>
+    </div>
+    </div>
+<!-- 示例消息：表情 -->
+<div class='flex justify-end'>
+        <div class='chat-message bg-ai-blue text-white p-3 rounded-tl-xl rounded-tr-xl rounded-bl-xl shadow-lg'>
+        <div class='flex items-center mb-1'>
+        <span class='font-bold mr-2'>
+        You
+    </span>
+<span class='text-xs text-white/70'>
+        10:33 AM
+    </span>
+    </div>
+<div class='text-3xl'>
+        👍🎉
+    </div>
+    </div>
+    </div>
+<!-- 占位符，用于确保滚动到底部 -->
+<div id='chat-bottom-anchor'>
+        </div>
+    </div>
+<!-- [/MODULE] 8cE_聊天主界面:消息展示区 -->
+<!-- 输入区域 -->
+<!-- [MODULE] 8cE_聊天主界面:输入框 -->
+<div class='p-4 border-t border-gray-700 bg-gray-800/70 shadow-inner'>
+        <!-- 表情选择器占位 -->
+<div id='emoji-picker-container' class='hidden mb-2 p-2 bg-gray-700 rounded-lg border border-gray-600'>
+        <!-- 实际表情列表将由JS动态生成 -->
+<div class='flex flex-wrap gap-2 text-2xl'>
+        <span class='cursor-pointer hover:scale-110 transition' data-emoji='😀'>
+        😀
+    </span>
+<span class='cursor-pointer hover:scale-110 transition' data-emoji='😂'>
+        😂
+    </span>
+<span class='cursor-pointer hover:scale-110 transition' data-emoji='😍'>
+        😍
+    </span>
+<span class='cursor-pointer hover:scale-110 transition' data-emoji='🤔'>
+        🤔
+    </span>
+<span class='cursor-pointer hover:scale-110 transition' data-emoji='🚀'>
+        🚀
+    </span>
+<span class='cursor-pointer hover:scale-110 transition' data-emoji='💡'>
+        💡
+    </span>
+    </div>
+    </div>
+<div class='flex items-end space-x-3'>
+        <!-- 表情按钮 -->
+<button id='emoji-toggle-btn' title='发送表情' class='p-3 text-gray-400 hover:text-yellow-400 transition rounded-full hover:bg-gray-700 h-12 w-12 flex items-center justify-center flex-shrink-0'>
+        <i class='fas fa-smile text-xl'>
+        </i>
+    </button>
+<!-- 输入框 -->
+<div class='flex-1 relative'>
+        <textarea id='message-input' placeholder='输入消息，支持 @音乐, @电影 或直接与AI对话...' rows='1' class='w-full p-3 pr-12 bg-gray-700/80 text-white border border-gray-600 rounded-xl focus:ring-2 focus:ring-ai-blue focus:border-ai-blue resize-none overflow-hidden transition duration-150 placeholder-gray-400' style='min-height: 3rem; max-height: 10rem;'>
+        </textarea>
+<!-- 提及/命令提示 -->
+<div id='mention-suggestion' class='absolute bottom-full left-0 mb-1 hidden w-48 bg-gray-800 border border-gray-600 rounded-lg shadow-xl p-1 text-sm z-20'>
+        <!-- 动态生成 @用户 或 @功能 建议 -->
+<div class='p-1 text-gray-300 hover:bg-gray-700 cursor-pointer rounded' data-mention='@AI'>
+        @AI (与AI对话)
+    </div>
+<div class='p-1 text-gray-300 hover:bg-gray-700 cursor-pointer rounded' data-mention='@音乐'>
+        @音乐 (请求音乐推荐)
+    </div>
+<div class='p-1 text-gray-300 hover:bg-gray-700 cursor-pointer rounded' data-mention='@电影'>
+        @电影 (请求电影推荐)
+    </div>
+    </div>
+    </div>
+<!-- 发送按钮 -->
+<button id='send-btn' class='bg-ai-blue text-white p-3 rounded-xl hover:bg-blue-600 transition duration-200 flex items-center justify-center h-12 w-12 flex-shrink-0 disabled:bg-gray-600 disabled:cursor-not-allowed' title='发送消息'>
+        <i class='fas fa-paper-plane'>
+        </i>
+    </button>
+    </div>
+    </div>
+<!-- [/MODULE] 8cE_聊天主界面:输入框 -->
+    </main>
+<!-- [/MODULE] 8cE_聊天主界面 -- 包含聊天窗口和输入区域 -->
+    </div>
+<!-- [JSMOD] app_main_logic -->
+<script >// 页面加载时初始化渲染
+document.addEventListener('DOMContentLoaded', function () {
+  var messageInput = document.getElementById('message-input');
+  var sendBtn = document.getElementById('send-btn');
+  var chatWindow = document.getElementById('chat-window');
+  var emojiToggleBtn = document.getElementById('emoji-toggle-btn');
+  var emojiPickerContainer = document.getElementById('emoji-picker-container');
+  var mentionSuggestion = document.getElementById('mention-suggestion');
+  var chatBottomAnchor = document.getElementById('chat-bottom-anchor');
+  // --- 1. 基础功能：发送消息与DOM操作 ---
+  /**
+   * 自动调整 textarea 高度
+   */
+  function autoResizeTextarea() {
+    messageInput.style.height = 'auto';
+    messageInput.style.height = messageInput.scrollHeight + 'px';
+    // 限制最大高度，防止过高
+    var maxHeight = parseFloat(getComputedStyle(messageInput).maxHeight);
+    if (messageInput.scrollHeight > maxHeight) {
+      messageInput.style.overflowY = 'auto';
+    } else {
+      messageInput.style.overflowY = 'hidden';
+    }
+  }
+  messageInput.addEventListener('input', function () {
+    autoResizeTextarea();
+    checkMentionsAndCommands();
+    updateSendButtonState();
+  });
+  // 初始调整高度
+  autoResizeTextarea();
+  /**
+   * 滚动到底部
+   */
+  function scrollToBottom() {
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+  /**
+   * 创建并添加消息到聊天窗口
+   * @param {string} text - 消息内容
+   * @param {string} sender - 发送者 ('user' 或 'ai')
+   * @param {string} [username='You'] - 用户名
+   */
+  function addMessage(text, sender) {
+    var username = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'You';
+    var isUser = sender === 'user';
+    var messageContainer = document.createElement('div');
+    messageContainer.className = "flex".concat(isUser ? 'justify-end' : 'justify-start');
+    var contentDiv = document.createElement('div');
+
+    // 样式处理
+    var baseClasses = 'chat-message p-3 shadow-lg';
+    var specificClasses;
+    var nameColor = isUser ? 'text-white' : 'text-ai-blue';
+    var timeColor = isUser ? 'text-white/70' : 'text-gray-300/70';
+    var bgColor;
+    if (isUser) {
+      // 用户消息：蓝色背景，圆角在左上、右上、左下
+      bgColor = 'bg-ai-blue';
+      specificClasses = 'rounded-tl-xl rounded-tr-xl rounded-bl-xl';
+    } else {
+      // AI/他人消息：深灰背景，圆角在右上、左下、右下
+      bgColor = 'bg-gray-700/70';
+      specificClasses = 'rounded-tr-xl rounded-bl-xl rounded-br-xl';
+    }
+    contentDiv.className = "".concat(baseClasses, "").concat(bgColor, "text-white").concat(isUser ? '' : 'max-w-[80%]');
+    var now = new Date();
+    var timeString = now.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    // 消息结构
+    contentDiv.innerHTML = "<div class=\"flex items-center mb-1\">\n                        <span class=\"font-bold mr-2".concat(nameColor, "\">").concat(username, "</span>\n                        <span class=\"text-xs").concat(timeColor, "\">").concat(timeString, "</span>\n                    </div>\n                    <p class=\"whitespace-pre-wrap\">").concat(formatMessageContent(text), "</p>");
+    if (!isUser) {
+      // AI 消息需要头像
+      var avatarImg = document.createElement('img');
+      avatarImg.src = "https://design.gemcoder.com/staticResource/echoAiSystemImages/72713b3a1045ecaf9955811de47d1d45.png";
+      avatarImg.className = 'w-10 h-10 rounded-full object-cover mt-1 border border-ai-blue';
+      avatarImg.alt = 'AI Avatar';
+      var wrapper = document.createElement('div');
+      wrapper.className = 'flex items-start space-x-3';
+      wrapper.appendChild(avatarImg);
+      wrapper.appendChild(contentDiv);
+      messageContainer.appendChild(wrapper);
+    } else {
+      messageContainer.appendChild(contentDiv);
+    }
+    chatWindow.insertBefore(messageContainer, chatBottomAnchor);
+    scrollToBottom();
+  }
+  /**
+   * 格式化消息内容，处理表情和特殊命令
+   * @param {string} text 
+   */
+  function formatMessageContent(text) {
+    var html = text;
+    // 1. 处理表情符号 (简单的替换)
+    var emojiMap = {
+      '👍': '👍',
+      '🎉': '🎉',
+      '😀': '😀',
+      '😂': '😂',
+      '😍': '😍',
+      '🤔': '🤔',
+      '🚀': '🚀',
+      '💡': '💡'
+    };
+    Object.keys(emojiMap).forEach(function (emoji) {
+      // 使用正则表达式确保只替换完整的表情符号，并用 span 包裹以保持样式一致性
+      var regex = new RegExp(escapeRegExp(emoji), 'g');
+      html = html.replace(regex, "<span class=\"text-xl\">".concat(emoji, "</span>"));
+    });
+    // 2. 处理 @ 提及和命令 (高亮显示)
+    // 匹配 @AI, @音乐, @电影 等
+    html = html.replace(/(@(AI|音乐|电影|[\w]+))/g, function (match) {
+      if (match === '@AI') {
+        return "<span class=\"font-bold text-ai-blue\">".concat(match, "</span>");
+      } else if (match === '@音乐' || match === '@电影') {
+        var icon = match === '@音乐' ? '<i class="fas fa-music mr-1 text-pink-400"></i>' : '<i class="fas fa-film mr-1 text-red-400"></i>';
+        return "<span class=\"font-bold text-yellow-300\">".concat(icon).concat(match, "</span>");
+      }
+      // 其他 @ 用户名
+      return "<span class=\"font-bold text-cyan-400\">".concat(match, "</span>");
+    });
+    return html;
+  }
+  function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
+  /**
+   * 模拟 AI 回复
+   * @param {string} userMessage 
+   */
+  function simulateAIResponse(userMessage) {
+    var responseText = "我收到了您的消息。";
+    var hasSpecialAction = false;
+    if (userMessage.includes('@AI') || userMessage.toLowerCase().includes('ai')) {
+      responseText = "您好！我是一个本地AI模型，专注于代码生成和问题解答。请问您想构建什么？";
+      hasSpecialAction = true;
+    } else if (userMessage.includes('@音乐')) {
+      responseText = "\u597D\u7684\uFF0C\u6B63\u5728\u4E3A\u60A8\u641C\u7D22\u672C\u5730\u97F3\u4E50\u5E93\u6216\u63A8\u8350\u4E00\u9996\u9002\u5408\u7F16\u7A0B\u7684\u80CC\u666F\u97F3\u4E50\u3002\n\uD83C\uDFB5 \u63A8\u8350: 'Synthwave Drive' - \u9002\u5408\u9AD8\u5F3A\u5EA6\u5F00\u53D1\uFF01";
+      hasSpecialAction = true;
+    } else if (userMessage.includes('@电影')) {
+      responseText = "\u6B63\u5728\u67E5\u8BE2\u60A8\u559C\u6B22\u7684\u7535\u5F71\u7C7B\u578B\uFF0C\u6216\u8005\u63A8\u8350\u4E00\u90E8\u7ECF\u5178\u79D1\u5E7B\u7247\u3002\n\uD83C\uDFAC \u63A8\u8350: \u300A\u94F6\u7FFC\u6740\u624B 2049\u300B - \u89C6\u89C9\u548C\u6C1B\u56F4\u90FD\u5F88\u68D2\u3002";
+      hasSpecialAction = true;
+    } else if (userMessage.includes('表情') || userMessage.includes('emoji')) {
+      responseText = "我看到您提到了表情。我支持发送简单的Unicode表情符号。👍🎉";
+    } else if (userMessage.length < 5) {
+      responseText = "信息太短了，请提供更多细节以便我更好地协助您。";
+    } else {
+      responseText = "这是一个基于您输入内容的模拟回复。在真实环境中，我会调用本地模型进行更深入的分析和生成。";
+    }
+    // 模拟延迟
+    setTimeout(function () {
+      addMessage(responseText, 'ai');
+    }, 500 + Math.random() * 1000);
+  }
+  /**
+   * 处理发送按钮点击事件
+   */
+  function handleSendMessage() {
+    var text = messageInput.value.trim();
+    if (text === '') return;
+    // 1. 添加用户消息
+    addMessage(text, 'user');
+    // 2. 清空输入框并重置高度
+    messageInput.value = '';
+    autoResizeTextarea();
+    updateSendButtonState();
+
+    // 3. 检查并隐藏建议框
+    mentionSuggestion.classList.add('hidden');
+    // 4. 模拟 AI 响应
+    simulateAIResponse(text);
+  }
+  sendBtn.addEventListener('click', handleSendMessage);
+  // 允许按 Enter 发送 (Shift+Enter 换行)
+  messageInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // 阻止默认的换行行为
+      handleSendMessage();
+    }
+  });
+  // --- 2. 表情功能 ---
+  emojiToggleBtn.addEventListener('click', function () {
+    emojiPickerContainer.classList.toggle('hidden');
+    // 隐藏建议框，如果打开了表情框
+    mentionSuggestion.classList.add('hidden');
+  });
+  // 表情选择
+  emojiPickerContainer.querySelectorAll('span[data-emoji]').forEach(function (span) {
+    span.addEventListener('click', function () {
+      var emoji = this.getAttribute('data-emoji');
+      messageInput.value += emoji;
+      autoResizeTextarea();
+      updateSendButtonState();
+      // 保持输入框焦点
+      messageInput.focus();
+    });
+  });
+  // 点击输入框外关闭表情选择器
+  document.addEventListener('click', function (e) {
+    if (!emojiPickerContainer.contains(e.target) && e.target !== emojiToggleBtn && !emojiToggleBtn.contains(e.target)) {
+      emojiPickerContainer.classList.add('hidden');
+    }
+  });
+  // --- 3. @ 提及和命令功能 ---
+  /**
+   * 检查输入内容，显示/隐藏 @ 建议框
+   */
+  function checkMentionsAndCommands() {
+    var text = messageInput.value;
+    var cursorPosition = messageInput.selectionStart;
+
+    // 查找光标前最后一个 '@' 符号的位置
+    var lastAtSymbolIndex = text.lastIndexOf('@', cursorPosition - 1);
+    if (lastAtSymbolIndex !== -1) {
+      var segment = text.substring(lastAtSymbolIndex + 1, cursorPosition).trim();
+      if (segment.length > 0) {
+        // 过滤建议项
+        var suggestions = Array.from(mentionSuggestion.querySelectorAll('[data-mention]')).filter(function (el) {
+          return el.getAttribute('data-mention').toLowerCase().startsWith('@' + segment.toLowerCase());
+        });
+        if (suggestions.length > 0) {
+          // 简单定位：将建议框定位在输入框下方
+          var rect = messageInput.getBoundingClientRect();
+          mentionSuggestion.style.left = "".concat(rect.left, "px");
+          mentionSuggestion.style.top = "".concat(rect.bottom + window.scrollY, "px");
+          mentionSuggestion.classList.remove('hidden');
+          // 简单高亮第一个建议项
+          suggestions.forEach(function (el, index) {
+            el.classList.toggle('bg-gray-600', index === 0);
+          });
+          return;
+        }
+      }
+    }
+    mentionSuggestion.classList.add('hidden');
+  }
+  /**
+   * 选中建议项
+   */
+  mentionSuggestion.querySelectorAll('[data-mention]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var mention = this.getAttribute('data-mention');
+      var text = messageInput.value;
+      var cursorPosition = messageInput.selectionStart;
+      var lastAtSymbolIndex = text.lastIndexOf('@', cursorPosition - 1);
+      if (lastAtSymbolIndex !== -1) {
+        // 替换从 @ 开始到当前光标前的所有内容
+        var prefix = text.substring(0, lastAtSymbolIndex);
+        var suffix = text.substring(cursorPosition);
+
+        // 插入提及内容，并确保后面跟一个空格，除非是命令
+        messageInput.value = prefix + mention + "" + suffix;
+
+        // 重新定位光标到提及内容之后
+        var newCursorPosition = prefix.length + mention.length + 1;
+        messageInput.setSelectionRange(newCursorPosition, newCursorPosition);
+        autoResizeTextarea();
+        mentionSuggestion.classList.add('hidden');
+        messageInput.focus();
+      }
+    });
+  });
+  // 监听输入框的焦点变化，用于隐藏建议框
+  messageInput.addEventListener('focus', checkMentionsAndCommands);
+  messageInput.addEventListener('blur', function () {
+    // 延迟隐藏，给点击建议项的时间
+    setTimeout(function () {
+      if (!mentionSuggestion.contains(document.activeElement)) {
+        mentionSuggestion.classList.add('hidden');
+      }
+    }, 100);
+  });
+
+  // 监听输入事件，实时检查
+  messageInput.addEventListener('keyup', checkMentionsAndCommands);
+  // --- 4. 界面状态控制 ---
+  /**
+   * 更新发送按钮的禁用状态
+   */
+  function updateSendButtonState() {
+    var isEmpty = messageInput.value.trim() === '';
+    sendBtn.disabled = isEmpty;
+  }
+  updateSendButtonState();
+  // --- 5. 房间切换模拟 ---
+  document.querySelectorAll('.room-item').forEach(function (item) {
+    item.addEventListener('click', function () {
+      var roomId = this.getAttribute('data-room-id');
+      var roomName = this.querySelector('span').textContent.trim();
+
+      // 视觉反馈：切换选中状态
+      document.querySelectorAll('.room-item').forEach(function (i) {
+        i.classList.remove('bg-gray-700/50', 'border-ai-blue/50');
+        i.classList.add('hover:bg-gray-700/30');
+      });
+      this.classList.add('bg-gray-700/50', 'border-ai-blue/50');
+      this.classList.remove('hover:bg-gray-700/30');
+      // 更新主界面标题
+      document.getElementById('current-room-name').textContent = roomName;
+
+      // 模拟清空聊天记录并显示新房间提示
+      chatWindow.innerHTML = "<div class=\"text-center text-sm text-gray-400 pt-4\">\n                            <div class=\"inline-block bg-gray-800/50 px-4 py-2 rounded-xl shadow-lg border border-gray-700\">\n                                <i class=\"fas fa-hashtag mr-2 text-ai-blue\"></i> \u5DF2\u5207\u6362\u5230".concat(roomName, "\u623F\u95F4\u3002\n                            </div>\n                        </div>\n                        <div id=\"chat-bottom-anchor\"></div>");
+      scrollToBottom();
+    });
+  });
+  // 初始滚动到底部
+  scrollToBottom();
+});</script>
+<!-- [/JSMOD] app_main_logic -- 包含聊天消息发送、AI模拟回复、表情支持、@功能提示和房间切换逻辑 -->
+    </body>
+    </html>

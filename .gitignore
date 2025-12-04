@@ -1,0 +1,7 @@
+chatroom.db
+build/
+*.spec
+*.pyc
+__pycache__/
+dist/
+*.log
